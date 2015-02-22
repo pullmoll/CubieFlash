@@ -19,7 +19,7 @@ CubieFlasher::CubieFlasher(QWidget *parent) :
         connect(m_flasher, SIGNAL(Status(QString)), this, SLOT(displayStatus(QString)));
         connect(m_flasher, SIGNAL(Error(QString)), this, SLOT(displayError(QString)));
 
-        m_timer = startTimer(500);
+        m_timer = startTimer(250);
 }
 
 CubieFlasher::~CubieFlasher()
