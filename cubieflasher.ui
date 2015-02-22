@@ -26,7 +26,7 @@
      <x>0</x>
      <y>0</y>
      <width>671</width>
-     <height>19</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -48,7 +48,7 @@
     <property name="title">
      <string>&amp;Preferences</string>
     </property>
-    <addaction name="action_Display_URBs"/>
+    <addaction name="action_Show_URBs"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Preferences"/>
@@ -64,6 +64,10 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_Flash_NAND">
+   <property name="icon">
+    <iconset resource="cubieflasher.qrc">
+     <normaloff>:/img/flash.png</normaloff>:/img/flash.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Flash NAND...</string>
    </property>
@@ -72,6 +76,10 @@
    </property>
   </action>
   <action name="action_About_CubieFlasher">
+   <property name="icon">
+    <iconset resource="cubieflasher.qrc">
+     <normaloff>:/img/help.png</normaloff>:/img/help.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;About CubieFlasher</string>
    </property>
@@ -80,6 +88,10 @@
    </property>
   </action>
   <action name="action_About_Qt">
+   <property name="icon">
+    <iconset resource="cubieflasher.qrc">
+     <normaloff>:/img/qt.png</normaloff>:/img/qt.png</iconset>
+   </property>
    <property name="text">
     <string>About &amp;Qt</string>
    </property>
@@ -88,6 +100,10 @@
    </property>
   </action>
   <action name="action_Quit">
+   <property name="icon">
+    <iconset resource="cubieflasher.qrc">
+     <normaloff>:/img/quit.png</normaloff>:/img/quit.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Quit</string>
    </property>
@@ -95,12 +111,16 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="action_Display_URBs">
+  <action name="action_Show_URBs">
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="cubieflasher.qrc">
+     <normaloff>:/img/showurb.png</normaloff>:/img/showurb.png</iconset>
+   </property>
    <property name="text">
-    <string>Display &amp;URBs</string>
+    <string>Show &amp;URBs</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+U</string>
@@ -108,6 +128,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="cubieflasher.qrc"/>
+ </resources>
  <connections/>
 </ui>

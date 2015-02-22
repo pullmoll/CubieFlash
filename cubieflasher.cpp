@@ -1,6 +1,23 @@
+/*
+ * Copyright (C) Jürgen Buchmüller <pullmoll@t-online.de>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "cubieflasher.h"
 #include "ui_cubieflasher.h"
 #include "about.h"
+#include "flasher.h"
 
 CubieFlasher::CubieFlasher(QWidget *parent) :
         QMainWindow(parent),
@@ -25,6 +42,15 @@ CubieFlasher::CubieFlasher(QWidget *parent) :
 CubieFlasher::~CubieFlasher()
 {
         delete ui;
+}
+
+void CubieFlasher::closeEvent(QCloseEvent *e)
+{
+        QSettings s;
+        s.setValue(QLatin1String("windowState"), saveState());
+        s.setValue(QLatin1String("windowGeometry"), saveGeometry());
+        s.setValue(QLatin1String("showURBs"), ui->action_Show_URBs->isChecked());
+        e->accept();
 }
 
 void CubieFlasher::timerEvent(QTimerEvent *e)
@@ -112,7 +138,7 @@ void CubieFlasher::setup_ui()
         ui->setupUi(this);
         connect_actions();
 
-        m_connected = new QLabel(tr("FEL"));
+        m_connected = new QLabel(tr("[FEL]"));
         ui->statusBar->addWidget(m_connected);
 
         m_status = new QLabel(tr("Status"));
@@ -123,13 +149,26 @@ void CubieFlasher::setup_ui()
         m_progress->setMinimumWidth(160);
         ui->statusBar->addPermanentWidget(m_progress);
 
+        QSettings s;
+        restoreState(s.value(QLatin1String("windowState")).toByteArray());
+        restoreGeometry(s.value(QLatin1String("windowGeometry")).toByteArray());
+        ui->action_Show_URBs->setChecked(s.value(QLatin1String("showURBs")).toBool());
 }
 
 void CubieFlasher::connect_actions()
 {
         connect(ui->action_Flash_NAND, SIGNAL(triggered()), this, SLOT(flash_NAND()));
         connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(quit()));
-        connect(ui->action_Display_URBs, SIGNAL(triggered(bool)), this, SLOT(toggleURBs(bool)));
+        connect(ui->action_Show_URBs, SIGNAL(triggered(bool)), this, SLOT(toggleURBs(bool)));
         connect(ui->action_About_CubieFlasher, SIGNAL(triggered()), this, SLOT(about_CubieFlasher()));
         connect(ui->action_About_Qt, SIGNAL(triggered()), this, SLOT(about_qt()));
+
+        ui->mainToolBar->setIconSize(QSize(32,32));
+        ui->mainToolBar->addAction(ui->action_Flash_NAND);
+        ui->mainToolBar->addAction(ui->action_Show_URBs);
+        ui->mainToolBar->addSeparator();
+        ui->mainToolBar->addAction(ui->action_Quit);
+        ui->mainToolBar->addSeparator();
+        ui->mainToolBar->addAction(ui->action_About_CubieFlasher);
+        ui->mainToolBar->addAction(ui->action_About_Qt);
 }

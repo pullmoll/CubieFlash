@@ -36,4 +36,5 @@ RESOURCES += \
 LIBS += -lusb-1.0
 
 OTHER_FILES += \
-    data/fes_1-1.asm
+    data/fes_1-1.asm \
+    img/cubieflasher.png

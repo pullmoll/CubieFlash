@@ -2,13 +2,15 @@
 #define CUBIEFLASHER_H
 
 #include <QMainWindow>
-#include <QDialog>
+#include <QCloseEvent>
+#include <QTimerEvent>
 #include <QLabel>
 #include <QCheckBox>
 #include <QMessageBox>
 #include <QProgressBar>
+#include <QSettings>
 
-#include "flasher.h"
+class flasher;
 
 namespace Ui {
 class CubieFlasher;
@@ -23,6 +25,7 @@ public:
         ~CubieFlasher();
 
 protected:
+        void closeEvent(QCloseEvent *e);
         void timerEvent(QTimerEvent *e);
 
 private slots:
