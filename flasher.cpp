@@ -47,7 +47,7 @@ void flasher::showURBs(bool show)
  */
 QString flasher::resource(const QString &name)
 {
-        return QString(":/cubietruck/bin/%1").arg(name);
+        return QString(":/cubietruck/data/%1").arg(name);
 }
 
 /**
@@ -138,7 +138,7 @@ bool flasher::stage_1_prep()
 
         showURB(32);
         version = m_usb->aw_fel_get_version();
-        qDebug("%s: version=%#04x", __func__, version);
+        qDebug("%s: version=0x%04x", __func__, version);
 
         showURB(41);
         buf[0] = '\0';
@@ -149,7 +149,7 @@ bool flasher::stage_1_prep()
 
         showURB(50);
         version = m_usb->aw_fel_get_version();
-        qDebug("%s: version=%#04x", __func__, version);
+        qDebug("%s: version=0x%04x", __func__, version);
 
         return version == 0x1651;
 }
@@ -378,7 +378,7 @@ bool flasher::stage_2_prep()
 
         showURB(32);
         version = m_usb->aw_fel_get_version();
-        qDebug("%s: version=%#04x", __func__, version);
+        qDebug("%s: version=0x%04x", __func__, version);
 
         showURB(42);
         if (!m_usb->aw_fel2_write(m_scratchpad, buf.data(), buf.size(), usb_FEL::AW_FEL_2_DRAM))
@@ -567,6 +567,7 @@ bool flasher::send_partitions_and_MBR()
 bool flasher::install_uboot()
 {
         qDebug("%s: ***************************", __func__);
+        static const QByteArray reply("updateBootxOk000");
         QByteArray buf;
 
         showURB(113241);
@@ -619,8 +620,8 @@ bool flasher::install_uboot()
         if (!m_usb->aw_pad_read(buf.data(), buf.size()))
                 return false;
 
-        bool success = 0 == strcmp(buf.data() + 24, "updateBootxOk000");
-        qDebug("install_boot0 result (%s)\n%s",
+        bool success = buf.mid(24, reply.size()) == reply;
+        qDebug("install_uboot result (%s)\n%s",
                success ? "SUCCESS" : "FAILURE",
                qPrintable(m_usb->hexdump(buf.constData(), 0, buf.size())));
 
@@ -631,6 +632,7 @@ bool flasher::install_uboot()
 bool flasher::install_boot0()
 {
         qDebug("%s: ***************************", __func__);
+        static const QByteArray reply("updateBootxOk000");
         QByteArray buf;
 
         showURB(113514);
@@ -692,7 +694,7 @@ bool flasher::install_boot0()
         if (!m_usb->aw_pad_read(buf.data(), buf.size()))
                 return false;
 
-        bool success = 0 == strcmp(buf.data() + 24, "updateBootxOk000");
+        bool success = buf.mid(24, reply.size()) == reply;
         qDebug("install_boot0 result (%s)\n%s",
                success ? "SUCCESS" : "FAILURE",
                qPrintable(m_usb->hexdump(buf.constData(), 0, buf.size())));
@@ -710,7 +712,7 @@ bool flasher::restore_system()
 
         showURB(113664);
         version = m_usb->aw_fel_get_version();
-        qDebug("%s: version=%#04x", __func__, version);
+        qDebug("%s: version=0x%04x", __func__, version);
 
         showURB(113673);
         if (!m_usb->aw_fel2_write(m_scratchpad + 4, "\xcd\xa5\x34\x12", 0x04, usb_FEL::AW_FEL_2_DRAM))
