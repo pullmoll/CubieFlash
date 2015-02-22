@@ -78,7 +78,7 @@
        <item>
         <widget class="QLabel" name="label1">
          <property name="text">
-          <string>%1 is a tool to flash the SLC NAND of the Cubietech Cubietruck, a.k.a. cubieboard3. </string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;%1 is a tool to flash the SLC NAND of the Cubietech Cubietruck, a.k.a. cubieboard3. The project page is at &lt;a href=&quot;https://github.com/pullmoll/CubieFlash&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="textFormat">
           <enum>Qt::RichText</enum>
@@ -87,6 +87,9 @@
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
          </property>
          <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="openExternalLinks">
           <bool>true</bool>
          </property>
         </widget>
@@ -113,6 +116,9 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Since &lt;a href=&quot;http://www.allwinner.com/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Allwinner&lt;/span&gt;&lt;/a&gt; never released the &lt;a href=&quot;http://linux-sunxi.org/Allwinner&quot;&gt;source code&lt;/a&gt; for their flash utilities LiveSuit and/or PhoenixSuit, all code is based on reverse engineering the USB communications between these utilies and the Cubietruck in FEL mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="openExternalLinks">
           <bool>true</bool>
          </property>
         </widget>
