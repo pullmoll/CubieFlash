@@ -10,6 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = CubieFlasher
 TEMPLATE = app
+VERSION = 0.1.1
 
 win32:DEFINES += __func__=__FUNCTION__
 unix:DEFINES += __func__=__PRETTY_FUNCTION__

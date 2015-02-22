@@ -19,6 +19,13 @@
  */
 #include "flasher.h"
 
+#define ADDR_CRC_TABLE  0x40100000      //!< address of the CRC table
+#define ADDR_FES_1      0x40200000      //!< address of fes_2-1.fex
+#define ADDR_FES_2      0x00007220
+#define ADDR_MAGIC_DE   0x40360000
+#define ADDR_FED_NAND   0x40430000
+#define ADDR_DRAM_BUFF  0x40600000
+
 flasher::flasher(QObject *parent) :
         QObject(parent),
         m_rc(0),
@@ -122,7 +129,7 @@ bool flasher::read_log(QByteArray& dest, size_t bytes, const QString& filename)
 
 bool flasher::stage_1_prep()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
 
         QByteArray buf;
         showURB(5);
@@ -176,7 +183,7 @@ bool flasher::stage_1_prep()
 
 bool flasher::install_fes_1_1()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
 
         static const QByteArray DRAM0("DRAM\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16);
         QEventLoop loop(this);
@@ -260,7 +267,7 @@ bool flasher::install_fes_1_1()
 
 bool flasher::install_fes_1_2()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
 
         static const QByteArray DRAM1("DRAM\1\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16);
         QByteArray buf1;
@@ -309,7 +316,7 @@ bool flasher::install_fes_1_2()
 
 bool flasher::send_crc_table()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
 
         QByteArray buf1;
 
@@ -317,14 +324,14 @@ bool flasher::send_crc_table()
         if (!read_log(buf1, 0x2000, resource(QLatin1String("pt1_000147"))))
                 return false;
 
-        if (!m_usb->aw_fel_write(0x40100000, buf1.data(), buf1.size()))
+        if (!m_usb->aw_fel_write(ADDR_CRC_TABLE, buf1.data(), buf1.size()))
                 return false;
 
         showURB(153);
         // read it back to make sure it's correct
         QByteArray buf2;
         buf2.fill('\0', buf1.size());
-        if (!m_usb->aw_fel_read(0x40100000, buf2.data(), buf2.size()))
+        if (!m_usb->aw_fel_read(ADDR_CRC_TABLE, buf2.data(), buf2.size()))
                 return false;
         if (buf1 != buf2) {
                 emit Error(tr("Compare to pt1_000147 failed"));
@@ -336,7 +343,7 @@ bool flasher::send_crc_table()
 
 bool flasher::install_fes_2()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
 
         QByteArray buf;
 
@@ -346,11 +353,11 @@ bool flasher::install_fes_2()
                 return false;
 
         showURB(174);
-        if (!m_usb->aw_fel_send_file(0x40200000, resource(QLatin1String("fes.fex"))))
+        if (!m_usb->aw_fel_send_file(ADDR_FES_1, resource(QLatin1String("fes.fex"))))
                 return false;
 
         showURB(192);
-        if (!m_usb->aw_fel_send_file(0x00007220, resource(QLatin1String("fes_2.fex"))))
+        if (!m_usb->aw_fel_send_file(ADDR_FES_2, resource(QLatin1String("fes_2.fex"))))
                 return false;
 
         showURB(198);
@@ -363,7 +370,7 @@ bool flasher::install_fes_2()
 
 bool flasher::stage_2_prep()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
 
         QByteArray buf;
         quint32 version;
@@ -421,19 +428,19 @@ bool flasher::install_fed_nand()
                 return false;
 
         showURB(60);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
                 return false;
 
         showURB(69);
-        if (!m_usb->aw_fel2_send_file(0x40430000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("FED_NAND_0000000"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_FED_NAND, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("FED_NAND_0000000"))))
                 return false;
 
         showURB(123);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
                 return false;
 
         showURB(132);
-        if (!m_usb->aw_fel2_exec(0x40430000, 0x31))
+        if (!m_usb->aw_fel2_exec(ADDR_FED_NAND, 0x31))
                 return false;
 
         showURB(135);
@@ -486,7 +493,7 @@ bool flasher::send_partition(const QString& filename, quint32 sector, quint32 se
                 return false;
         }
 
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_cr_start.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_cr_start.fex"))))
                 return false;
 
         file_size = fin.size();
@@ -526,7 +533,7 @@ bool flasher::send_partition(const QString& filename, quint32 sector, quint32 se
         }
         fin.close();
 
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_cr_end.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_cr_end.fex"))))
                 return false;
 
         emit Status(tr("Sending %1 done.").arg(filename));
@@ -536,7 +543,7 @@ bool flasher::send_partition(const QString& filename, quint32 sector, quint32 se
 
 bool flasher::send_partitions_and_MBR()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
 
         return true;    // for now
 
@@ -585,12 +592,12 @@ bool flasher::send_partitions_and_MBR()
 
 bool flasher::install_uboot()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
         static const QByteArray reply("updateBootxOk000");
         QByteArray buf;
 
         showURB(113241);
-        if (!m_usb->aw_fel2_send_file(0x40600000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("UBOOT_0000000000"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_DRAM_BUFF, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("UBOOT_0000000000"))))
                 return false;
 
         showURB(113303);
@@ -607,23 +614,23 @@ bool flasher::install_uboot()
                 return false;
 
         showURB(113322);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
                 return false;
 
         showURB(113331);
-        if (!m_usb->aw_fel2_send_file(0x40430000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("UPDATE_BOOT1_000"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_FED_NAND, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("UPDATE_BOOT1_000"))))
                 return false;
 
         showURB(113384);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
                 return false;
 
         showURB(113394);
-        if (!m_usb->aw_fel2_exec(0x40430000, 0x11))
+        if (!m_usb->aw_fel2_exec(ADDR_FED_NAND, 0x11))
                 return false;
 
         showURB(113397);
-        if (!m_usb->aw_fel2_send_4uints(0x40600000, 0x40400000, 0x40410000, 0))
+        if (!m_usb->aw_fel2_send_4uints(ADDR_DRAM_BUFF, 0x40400000, 0x40410000, 0))
                 return false;
 
         showURB(113402);
@@ -640,9 +647,10 @@ bool flasher::install_uboot()
                 return false;
 
         bool success = buf.mid(24, reply.size()) == reply;
-        qDebug("install_uboot result (%s)\n%s",
-               success ? "SUCCESS" : "FAILURE",
-               qPrintable(m_usb->hexdump(buf.constData(), 0, buf.size())));
+        qDebug("install_uboot result (%s)", success ? "SUCCESS" : "FAILURE");
+        if (!success) {
+                qDebug("%s", qPrintable(m_usb->hexdump(buf.constData(), 0, buf.size())));
+        }
 
         return success;
 }
@@ -650,20 +658,20 @@ bool flasher::install_uboot()
 
 bool flasher::install_boot0()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
         static const QByteArray reply("updateBootxOk000");
         QByteArray buf;
 
         showURB(113514);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
                 return false;
 
         showURB(113523);
-        if (!m_usb->aw_fel2_send_file(0x40600000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("BOOT0_0000000000"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_DRAM_BUFF, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("BOOT0_0000000000"))))
                 return false;
 
         showURB(113532);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
                 return false;
 
         showURB(113541);
@@ -681,23 +689,23 @@ bool flasher::install_boot0()
                 return false;
 
         showURB(113559);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
                 return false;
 
         showURB(113565);
-        if (!m_usb->aw_fel2_send_file(0x40430000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("UPDATE_BOOT0_000"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_FED_NAND, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("UPDATE_BOOT0_000"))))
                 return false;
 
         showURB(113610);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
                 return false;
 
         showURB(113619);
-        if (!m_usb->aw_fel2_exec(0x40430000, 0x11))
+        if (!m_usb->aw_fel2_exec(ADDR_FED_NAND, 0x11))
                 return false;
 
         showURB(113622);
-        if (!m_usb->aw_fel2_send_4uints(0x40600000, 0x40400000, 0x40410000, 0))
+        if (!m_usb->aw_fel2_send_4uints(ADDR_DRAM_BUFF, 0x40400000, 0x40410000, 0))
                 return false;
 
         showURB(113628);
@@ -714,17 +722,18 @@ bool flasher::install_boot0()
                 return false;
 
         bool success = buf.mid(24, reply.size()) == reply;
-        qDebug("install_boot0 result (%s)\n%s",
-               success ? "SUCCESS" : "FAILURE",
-               qPrintable(m_usb->hexdump(buf.constData(), 0, buf.size())));
-
+        qDebug("install_boot0 result (%s)",
+               success ? "SUCCESS" : "FAILURE");
+        if (!success) {
+                qDebug("%s", qPrintable(m_usb->hexdump(buf.constData(), 0, buf.size())));
+        }
         return success;
 }
 
 
 bool flasher::restore_system()
 {
-        qDebug("%s: ***************************", __func__);
+        qDebug("%s: ******** START ********", __func__);
 
         QByteArray buf;
         quint32 version;
@@ -738,19 +747,19 @@ bool flasher::restore_system()
                 return false;
 
         showURB(113682);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_start.fex"))))
                 return false;
 
         showURB(113691);
-        if (!m_usb->aw_fel2_send_file(0x40430000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("FET_RESTORE_0000"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_FED_NAND, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("FET_RESTORE_0000"))))
                 return false;
 
         showURB(113703);
-        if (!m_usb->aw_fel2_send_file(0x40360000, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
+        if (!m_usb->aw_fel2_send_file(ADDR_MAGIC_DE, usb_FEL::AW_FEL_2_DRAM, resource(QLatin1String("magic_de_end.fex"))))
                 return false;
 
         showURB(113709);
-        if (!m_usb->aw_fel2_exec(0x40430000, 0x11))
+        if (!m_usb->aw_fel2_exec(ADDR_FED_NAND, 0x11))
                 return false;
 
         showURB(113712);
