@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/cubietruck">
+	<file>data/BOOT0_0000000000</file>
+	<file>data/FED_NAND_0000000</file>
+	<file>data/FET_RESTORE_0000</file>
+	<file>data/fes_1-1.fex</file>
+	<file>data/fes_1-2.fex</file>
+	<file>data/fes_2.fex</file>
+	<file>data/fes.fex</file>
+	<file>data/magic_cr_end.fex</file>
+	<file>data/magic_cr_start.fex</file>
+	<file>data/magic_de_end.fex</file>
+	<file>data/magic_de_start.fex</file>
+	<file>data/pt1_000063</file>
+	<file>data/pt1_000081</file>
+	<file>data/pt1_000138</file>
+	<file>data/pt1_000147</file>
+	<file>data/pt2_000054</file>
+	<file>data/pt2_113307</file>
+	<file>data/pt2_113316</file>
+	<file>data/pt2_113541</file>
+	<file>data/pt2_113550</file>
+	<file>data/UBOOT_0000000000</file>
+	<file>data/UPDATE_BOOT0_000</file>
+	<file>data/UPDATE_BOOT1_000</file>
+    </qresource>
+</RCC>
